@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--
+	curve-edit -- tool to generate linear curves for POV-Ray
+	(c) 2022 B.M.Deeal.
+	curve-edit is distributed under the terms of the ISC License, see the provided license.txt or visit <https://opensource.org/licenses/ISC> for details.
+-->
+<html>
+<head>
+	<title>curve-edit -- generate linear curves for POV-Ray</title>
+	<script src="curve-edit.js"></script>
+	<link rel="stylesheet" href="curve-edit.css">
+</head>
+<body>
+<div class="main">
+	curve-edit -- tool to generate linear curves for POV-Ray
+	<hr>
+	<div class="canvas_block">
+	<canvas width="512" height="512" id="canvas_main">curve-edit requires canvas support.</canvas>
+	</div>
+	<button id="button_load" onclick="updateData()">Update with data</button><button id="button_reset" ondblclick="resetPoints()">Reset all points</button>
+	<hr>
+	Raw points:<br>
+	<textarea rows="8" cols="32" id="text_raw"></textarea><br>
+	POV-Ray list:<br>
+	<textarea rows="8" cols="32" id="text_pov"></textarea>
+	<hr>
+	Usage:
+	<ul>
+	<li>Double-click to add a point.</li>
+	<li>Drag a point to move it.</li>
+	<li>Click while holding shift to remove a point.</li>
+	<li>Raw data can be entered below, two numbers per line.</li>
+	<li>The POV-Ray output data is emitted </li>
+	</ul>
+	<hr>
+	(c) 2022 B.M.Deeal. curve-edit is distributed under the terms of the ISC License.<br>
+	<a href="license.txt">Click here for details.</a>
+</div>
+</body>
+</html>

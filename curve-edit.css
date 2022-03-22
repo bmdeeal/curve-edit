@@ -1,0 +1,26 @@
+/*
+	curve-edit -- tool to generate linear curves for POV-Ray
+	(c) 2022 B.M.Deeal.
+	curve-edit is distributed under the terms of the ISC License, see the provided license.txt or visit <https://opensource.org/licenses/ISC> for details.
+*/
+
+body {
+	background: #888;
+}
+.main {
+	background: #ddd;
+	max-width: 620px;
+	margin: auto;
+	margin-top: 8px;
+	margin-bottom: 12px;
+	border-radius: 12px;
+	padding: 8px;
+}
+
+.canvas_block {
+	text-align: center;
+}
+
+#canvas_main {
+	background: #fff;
+}
