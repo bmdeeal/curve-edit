@@ -15,13 +15,14 @@ var data_pov;
 var data_raw;
 var points=[];
 var TAU=Math.PI*2;
-var dragging=false;
+//var dragging=false;
 var drag_item=-1;
+var selected_item=-1;
 var handle_size=6;
 
 function init() {
 	data_pov.value="//Nothing here yet."
-	data_raw.value=""
+	//data_raw.value=""
 	redraw();
 }
 
@@ -33,6 +34,7 @@ function numToFloat(num) {
 //generate data you can copy into POV-Ray
 //TODO: fromPOVFormat, which probably won't be too hard to write, but more work than I'd like
 function toPOVFormat() {
+	//data_pov.value="//curve-edit generated data start\n"
 	data_pov.value="linear_spline " + String(points.length) + "\n";
 	for (var ii=0; ii<points.length; ii++) {
 		data_pov.value+="<"+String(1-numToFloat(points[ii].x))+", "+String(1-numToFloat(points[ii].y))+">";
@@ -41,6 +43,7 @@ function toPOVFormat() {
 		}
 		data_pov.value+="\n";
 	}
+	//data_pov.value+="//curve-edit generated data end"
 }
 
 //reset the list of points
@@ -56,8 +59,9 @@ function checkDrag(e) {
 	console.log(getStringXY(mouse_pos));
 	for (let ii=0; ii<points.length; ii++) {
 		if (mouse_pos.x>points[ii].x-handle_size && mouse_pos.x<points[ii].x+handle_size && mouse_pos.y>points[ii].y-handle_size && mouse_pos.y<points[ii].y+handle_size) {
-			dragging=true;
+			//dragging=true;
 			drag_item=ii;
+			selected_item=ii;
 			return;
 		}
 	}
@@ -65,7 +69,7 @@ function checkDrag(e) {
 
 //if we're dragging, keep updating the position of the point
 function doDrag(e) {
-	if (dragging) {
+	if (drag_item>=0) {
 		console.log("dragging");
 		var mouse_pos=getMouseXY(e);
 		points[drag_item]=mouse_pos;
@@ -76,11 +80,12 @@ function doDrag(e) {
 
 //drop the point if we're done dragging, update the list
 function endDrag(e) {
-	if (dragging) {
+	if (drag_item>=0) {
 		console.log("ending drag");
 		var mouse_pos=getMouseXY(e);
 		console.log(getStringXY(mouse_pos));
-		dragging=false;
+		//dragging=false;
+		drag_item=-1;
 		redraw();
 	}
 }
@@ -117,6 +122,14 @@ function redraw() {
 		ctx.stroke()
 		//draw control points
 		ctx.fillStyle = "#000000";
+		//show last item (may not keep this? not sure how I might design things yet)
+		if (ii==points.length-1) {
+			ctx.fillStyle = "#880000";
+		}
+		//show selected item
+		if (selected_item==ii) {
+			ctx.fillStyle = "#0000cc";
+		}
 		ctx.beginPath();
 		ctx.arc(current_pos.x,current_pos.y,handle_size,0,TAU);
 		ctx.fill();
@@ -134,6 +147,7 @@ function getStringXY(item) {
 	return String(item.x)+", "+String(item.y);
 }
 
+/*
 //TODO: add new data from the raw points list, assuming I keep that feature
 function updateData() {
 	var number_list = data_raw.value.split("\n");
@@ -143,8 +157,9 @@ function updateData() {
 	redraw();
 	console.log(number_list);
 }
+*/
 
-
+//add a new point to the object
 function addPoint(e) {
 	//for some reason, this gets called twice?
 	if (e===undefined) {
@@ -154,7 +169,10 @@ function addPoint(e) {
 	console.log(e);
 	var mouse_pos=getMouseXY(e);
 	console.log(mouse_pos);
-	points.push({x:mouse_pos.x, y:mouse_pos.y});
+	//points.push({x:mouse_pos.x, y:mouse_pos.y});
+	selected_item++;
+	points.splice(selected_item,0,{x:mouse_pos.x, y:mouse_pos.y})
+	//selected_item=//TODO: select the most recent point
 	redraw();
 }
 
