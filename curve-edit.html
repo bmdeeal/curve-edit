@@ -17,7 +17,7 @@
 	<div class="canvas_block">
 	<canvas width="512" height="512" id="canvas_main">curve-edit requires canvas support.</canvas>
 	</div>
-	<!--<button id="button_load" onclick="updateData()">Update with data</button>--><button id="button_reset" ondblclick="resetPoints()">Reset all points (double click)</button>
+	<!--<button id="button_load" onclick="updateData()">Update with data</button>--><button id="button_reset" ondblclick="resetPoints()">Reset all points (double click)</button><button id="button_delete" onclick="removePoint()">Delete selected point</button>
 	<hr>
 	<!--
 	Raw points:<br>
@@ -27,12 +27,10 @@
 	<hr>
 	Usage:
 	<ul>
-	<li>Double-click to add a point.</li>
+	<li>Double-click on a location to add a point. Points will be added after the selected point, or after the last one if one is not selected.</li>
+	<li>Click on a point to select it.</li>
 	<li>Drag a point to move it.</li>
-	<li>Lathe curves in POV-Ray will be revolved around the right side of the view.</li>
-	<!--<li>Click while holding shift to remove a point.</li> unimplemented-->
-	<!--<li>Raw data can be entered below, two numbers per line.</li>-->
-	<!--<li>The POV-Ray output data is emitted </li>-->
+	<li>When adding the generated data to a lathe object in POV-Ray, the curve will be revolved around the right side of the view.</li>
 	</ul>
 	<hr>
 	(C) 2022 B.M.Deeal. curve-edit is distributed under the terms of the ISC License.<br>

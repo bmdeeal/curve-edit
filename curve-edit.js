@@ -3,9 +3,14 @@
 	(c) 2022 B.M.Deeal.
 	curve-edit is distributed under the terms of the ISC License, see the provided license.txt or visit <https://opensource.org/licenses/ISC> for details.
 	
-	This is curve-edit version 0.1-alpha.
+	This is curve-edit version 0.1-beta.
 	TODO:
-	* we assume all values are 0-255 but like, is that ever well defined anywhere?
+	* we assume all values are 0-512 but like, is that ever well defined anywhere?
+	* how should I handle adding a point to the beginning? should I just have an option to flip the first and last point? doesn't seem intuitive, even if this program is intended for a probably technical audience
+	* option to generate closed shapes
+	* option to generate solid lathe objects (eg, return to 0 on the x-axis)
+	* option to normalize the y-position based on the lowest one
+	* generate a basic object with a material attached so you can just throw it into the scene without changes? dunno
 */
 
 "use strict";
@@ -171,8 +176,16 @@ function addPoint(e) {
 	console.log(mouse_pos);
 	//points.push({x:mouse_pos.x, y:mouse_pos.y});
 	selected_item++;
-	points.splice(selected_item,0,{x:mouse_pos.x, y:mouse_pos.y})
+	points.splice(selected_item,0,{x:mouse_pos.x, y:mouse_pos.y});
 	//selected_item=//TODO: select the most recent point
+	redraw();
+}
+
+//remove a point from the object
+function removePoint() {
+	if (selected_item>=0 && selected_item<points.length) {
+		points.splice(selected_item, 1);
+	}
 	redraw();
 }
 
