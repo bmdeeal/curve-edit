@@ -11,44 +11,87 @@
 	* option to generate solid lathe objects (eg, return to 0 on the x-axis)
 	* option to normalize the y-position based on the lowest one
 	* generate a basic object with a material attached so you can just throw it into the scene without changes? dunno
+	* smooth curve support - look into <https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/quadraticCurveTo> and <http://www.povray.org/documentation/view/3.7.1/60/>
 */
 
 "use strict";
 var canvas;
 var ctx;
-var data_pov;
-var data_raw;
+var data_pov; //data in POV-Ray format
+var data_ce; //data in curve-edit format
 var points=[];
 var TAU=Math.PI*2;
 //var dragging=false;
 var drag_item=-1;
 var selected_item=-1;
 var handle_size=6;
+var close_shape;
 
 function init() {
-	data_pov.value="//Nothing here yet."
-	//data_raw.value=""
+	data_pov.value="//Nothing here yet.";
+	data_ce.value="";
 	redraw();
 }
 
 //convert a 0 to 512 number to a 0.0-1.0 one
-function numToFloat(num) {
+function numCEToFloat(num) {
 	return num/512;
 }
 
 //generate data you can copy into POV-Ray
-//TODO: fromPOVFormat, which probably won't be too hard to write, but more work than I'd like
 function toPOVFormat() {
 	//data_pov.value="//curve-edit generated data start\n"
-	data_pov.value="linear_spline " + String(points.length) + "\n";
+	let check=0;
+	if (close_shape.checked) {
+		check=1;
+	}
+	data_pov.value="linear_spline " + String(points.length+check) + "\n";
 	for (var ii=0; ii<points.length; ii++) {
-		data_pov.value+="<"+String(1-numToFloat(points[ii].x))+", "+String(1-numToFloat(points[ii].y))+">";
+		data_pov.value+="<"+String(1-numCEToFloat(points[ii].x))+", "+String(1-numCEToFloat(points[ii].y))+">";
 		if (ii!=points.length-1) {
 			data_pov.value+=",";
 		}
 		data_pov.value+="\n";
 	}
 	//data_pov.value+="//curve-edit generated data end"
+	if (close_shape.checked && points.length>2) {
+		data_pov.value+="<"+String(1-numCEToFloat(points[0].x))+", "+String(1-numCEToFloat(points[0].y))+">";
+	}
+}
+
+//generate data in the simple curve-edit format
+function toCEFormat() {
+	data_ce.value="#!curve-edit-format 1\n"
+	for (var ii=0; ii<points.length; ii++) {
+		data_ce.value+=String(points[ii].x)+" "+String(points[ii].y)+"\n";
+	}
+}
+
+//load data in the simple curve-edit format
+function fromCEFormat() {
+	let points_new=[]
+	let data=data_ce.value.split("\n");
+	selected_item=-1;
+	for (var ii=0; ii<data.length; ii++) {
+		data[ii]=data[ii].trim();
+		if (data[ii]=="" || data[ii].charAt(0)=="#") {
+			continue
+		}
+		let current_point=data[ii].split(" ")
+		if (current_point.length != 2) {
+			alert("Wrong number of values on line " + ii + "!");
+			return;
+		}
+		let new_x=Number(current_point[0])
+		let new_y=Number(current_point[1])
+		if (Number.isNaN(new_x) || Number.isNaN(new_y)) {
+			alert("Could not parse number on line " + ii + "!");
+			return;
+		}
+		points_new.splice(points_new.length,0,{x:Number(current_point[0]), y:Number(current_point[1])});
+	}
+	points=points_new;
+	redraw()
 }
 
 //reset the list of points
@@ -111,6 +154,7 @@ function redraw() {
 	//draw the curve
 	var prev_pos;
 	for (let ii=0; ii<points.length; ii++) {
+		let handle_scale=1
 		//edge case on first point with line drawing
 		if (ii==0) {
 			prev_pos=points[0]
@@ -129,40 +173,39 @@ function redraw() {
 		ctx.fillStyle = "#000000";
 		//show last item (may not keep this? not sure how I might design things yet)
 		if (ii==points.length-1) {
-			ctx.fillStyle = "#880000";
+			ctx.fillStyle = "#cc0000";
 		}
 		//show selected item
 		if (selected_item==ii) {
 			ctx.fillStyle = "#0000cc";
+			handle_scale=1.25
 		}
 		ctx.beginPath();
-		ctx.arc(current_pos.x,current_pos.y,handle_size,0,TAU);
+		ctx.arc(current_pos.x,current_pos.y,handle_size*handle_scale,0,TAU);
 		ctx.fill();
 	}
+	//TODO: this will need a rewrite when smooth curves are added
+	if (close_shape.checked) {
+		ctx.strokeStyle= "#888888";
+		ctx.beginPath();
+		ctx.moveTo(points[points.length-1].x,points[points.length-1].y);
+		ctx.lineTo(points[0].x,points[0].y);
+		ctx.stroke();
+	}
+	
 	toPOVFormat();
+	toCEFormat();
 }
 
 function getMouseXY(e) {
 	var rect=canvas.getBoundingClientRect();
-	return {x: e.clientX-rect.left, y: e.clientY-rect.top};
+	return {x: e.clientX-rect.left+0.5, y: e.clientY-rect.top};
 }
 
 //convert an object that has x,y parameters to a string
 function getStringXY(item) {
 	return String(item.x)+", "+String(item.y);
 }
-
-/*
-//TODO: add new data from the raw points list, assuming I keep that feature
-function updateData() {
-	var number_list = data_raw.value.split("\n");
-	for (var ii=0; ii < number_list.length; ii++) {
-		number_list[ii] = number_list[ii].split(" ");
-	}
-	redraw();
-	console.log(number_list);
-}
-*/
 
 //add a new point to the object
 function addPoint(e) {
@@ -197,7 +240,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	canvas.addEventListener("mousemove",doDrag);
 	canvas.addEventListener("mouseup", endDrag);
 	ctx = canvas.getContext("2d");
-	data_raw = document.getElementById("text_raw");
+	data_ce = document.getElementById("text_ce");
 	data_pov = document.getElementById("text_pov");
+	close_shape = document.getElementById("check_closed");
 	init();
 });

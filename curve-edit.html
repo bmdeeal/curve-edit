@@ -17,11 +17,13 @@
 	<div class="canvas_block">
 	<canvas width="512" height="512" id="canvas_main">curve-edit requires canvas support.</canvas>
 	</div>
-	<!--<button id="button_load" onclick="updateData()">Update with data</button>--><button id="button_reset" ondblclick="resetPoints()">Reset all points (double click)</button><button id="button_delete" onclick="removePoint()">Delete selected point</button>
 	<hr>
-	<!--
+	<!--<button id="button_load" onclick="updateData()">Update with data</button>--><button id="button_reset" ondblclick="resetPoints()">Reset all points (double click)</button><button id="button_delete" onclick="removePoint()">Delete selected point</button><br>
+	<input type="checkbox" id="check_closed" onchange="redraw()">Close shape</input>
+	<hr>
 	Raw points:<br>
-	<textarea rows="8" cols="32" id="text_raw"></textarea><br>-->
+	<textarea rows="8" cols="40" id="text_ce"></textarea><br>
+	<button id="button_load_ce" onclick="fromCEFormat()">Load from textbox</button><hr>
 	POV-Ray list:<br>
 	<textarea rows="8" cols="40" id="text_pov"></textarea>
 	<hr>
