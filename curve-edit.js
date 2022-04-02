@@ -26,6 +26,7 @@ var drag_item=-1;
 var selected_item=-1;
 var handle_size=6;
 var close_shape;
+var curve_mode;
 
 function init() {
 	data_pov.value="//Nothing here yet.";
@@ -138,6 +139,41 @@ function endDrag(e) {
 	}
 }
 
+function linearDraw() {
+	//draw the curve
+	ctx.strokeStyle= "#000000";
+	ctx.beginPath();
+	for (let ii=0; ii<points.length; ii++) {
+		//edge case on first point with line drawing
+		if (ii==0) {
+			ctx.moveTo(points[ii].x,points[ii].y);
+		}
+		else {
+			ctx.lineTo(points[ii].x,points[ii].y);
+		}
+		let current_pos=points[ii];
+	}
+	if (close_shape.checked) {
+		ctx.lineTo(points[0].x,points[0].y);
+	}
+	ctx.stroke()
+}
+
+function bezierDraw() {
+	//draw the curve
+	ctx.strokeStyle= "#000000";
+	ctx.beginPath();
+	for (let ii=0; ii<Math.floor(points.length/4); ii++) {
+		let nn=ii*4
+		ctx.moveTo(points[nn].x,points[nn].y);
+		ctx.bezierCurveTo(points[nn+1].x,points[nn+1].y,points[nn+2].x,points[nn+2].y,points[nn+3].x,points[nn+3].y)
+	}
+	/*if (close_shape.checked) {
+		ctx.lineTo(points[0].x,points[0].y);
+	}*/
+	ctx.stroke()
+}
+
 //draw everything over
 function redraw() {
 	//blank everything
@@ -151,48 +187,32 @@ function redraw() {
 	ctx.lineTo(canvas.width/2,canvas.height);
 	ctx.stroke();
 	ctx.strokeStyle = "#888888";
-	//draw the curve
-	var prev_pos;
+	linearDraw()
+	//bezierDraw()
 	for (let ii=0; ii<points.length; ii++) {
 		let handle_scale=1
-		//edge case on first point with line drawing
-		if (ii==0) {
-			prev_pos=points[0]
-		}
-		else {
-			prev_pos=points[ii-1];
-		}
-		var current_pos=points[ii];
-		//draw lines
-		ctx.strokeStyle= "#000000";
-		ctx.beginPath();
-		ctx.moveTo(prev_pos.x,prev_pos.y);
-		ctx.lineTo(current_pos.x,current_pos.y);
-		ctx.stroke()
 		//draw control points
 		ctx.fillStyle = "#000000";
-		//show last item (may not keep this? not sure how I might design things yet)
+		//show first and last items
 		if (ii==points.length-1) {
 			ctx.fillStyle = "#cc0000";
+		}
+		else if (ii==0) {
+			ctx.fillStyle = "#cc00cc";
 		}
 		//show selected item
 		if (selected_item==ii) {
 			ctx.fillStyle = "#0000cc";
 			handle_scale=1.25
 		}
+		if (selected_item==ii-1 && selected_item!=-1) {
+			ctx.fillStyle = "#00cc00";
+			handle_scale=1.25
+		}
 		ctx.beginPath();
-		ctx.arc(current_pos.x,current_pos.y,handle_size*handle_scale,0,TAU);
+		ctx.arc(points[ii].x,points[ii].y,handle_size*handle_scale,0,TAU);
 		ctx.fill();
 	}
-	//TODO: this will need a rewrite when smooth curves are added
-	if (close_shape.checked) {
-		ctx.strokeStyle= "#888888";
-		ctx.beginPath();
-		ctx.moveTo(points[points.length-1].x,points[points.length-1].y);
-		ctx.lineTo(points[0].x,points[0].y);
-		ctx.stroke();
-	}
-	
 	toPOVFormat();
 	toCEFormat();
 }
@@ -243,5 +263,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	data_ce = document.getElementById("text_ce");
 	data_pov = document.getElementById("text_pov");
 	close_shape = document.getElementById("check_closed");
+	curve_mode = document.getElementById("select_curve_mode");
 	init();
 });
